@@ -1,13 +1,12 @@
 package com.summer.controller;
 
-import com.summer.entity.Article;
+import com.summer.entity.R;
 import com.summer.service.ArticleService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * @Author Summer
@@ -19,8 +18,10 @@ import java.util.List;
 public class ArticleController {
     @Resource
     private ArticleService articleService;
-    @GetMapping
-    public List<Article> test(){
-        return articleService.list();
+
+    @GetMapping("hot")
+    public R hot() {
+        // 查询热门文章封装成R返回
+        return articleService.hotArticleList();
     }
 }
