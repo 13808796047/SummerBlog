@@ -8,4 +8,5 @@ package com.summer.constans;
 public class SystemConstans {
     public static final int ARTICLE_STATUS_DRAFT = 1;
     public static final int ARTICLE_STATUS_NORMAL = 0;
+    public static final int STATUS_NORMAL = 0;
 }
