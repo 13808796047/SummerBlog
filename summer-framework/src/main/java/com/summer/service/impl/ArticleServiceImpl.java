@@ -3,10 +3,13 @@ package com.summer.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.summer.constans.SystemConstans;
 import com.summer.entity.Article;
 import com.summer.entity.R;
+import com.summer.entity.vo.HotArticleVo;
 import com.summer.mapper.ArticleMapper;
 import com.summer.service.ArticleService;
+import com.summer.utils.BeanCopyUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,13 +26,21 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         // 查询热门文章
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
         // 必须是正式文章
-        queryWrapper.eq(Article::getStatus, 0);
+        queryWrapper.eq(Article::getStatus, SystemConstans.ARTICLE_STATUS_NORMAL);
         // 按照浏览量进行排序
         queryWrapper.orderByDesc(Article::getViewCount);
         // 查询10条数据
         Page<Article> page = new Page<>(1, 10);
         page(page, queryWrapper);
         List<Article> articles = page.getRecords();
-        return R.okResult(articles);
+        // bean拷贝
+//        List<HotArticleVo> articleVos = new ArrayList<>();
+//        articles.forEach(article -> {
+//            HotArticleVo vo = new HotArticleVo();
+//            BeanUtils.copyProperties(article, vo);
+//            articleVos.add(vo);
+//        });
+        List<HotArticleVo> articleVos = BeanCopyUtils.copyBeanList(articles, HotArticleVo.class);
+        return R.okResult(articleVos);
     }
 }
