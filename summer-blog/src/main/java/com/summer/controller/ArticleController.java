@@ -19,6 +19,11 @@ public class ArticleController {
     @Resource
     private ArticleService articleService;
 
+    @GetMapping("")
+    public R index(Integer page, Integer page_size, Long category_id) {
+        return articleService.getArticleList(page, page_size, category_id);
+    }
+
     @GetMapping("hot")
     public R hot() {
         // 查询热门文章封装成R返回

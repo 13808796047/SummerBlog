@@ -6,13 +6,19 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.summer.constans.SystemConstans;
 import com.summer.entity.Article;
 import com.summer.entity.R;
+import com.summer.entity.vo.ArticleListVo;
 import com.summer.entity.vo.HotArticleVo;
+import com.summer.entity.vo.PageVo;
 import com.summer.mapper.ArticleMapper;
 import com.summer.service.ArticleService;
+import com.summer.service.CategoryService;
 import com.summer.utils.BeanCopyUtils;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Author Summer
@@ -21,6 +27,9 @@ import java.util.List;
  */
 @Service
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> implements ArticleService {
+    @Resource
+    private CategoryService categoryService;
+
     @Override
     public R hotArticleList() {
         // 查询热门文章
@@ -43,4 +52,25 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         List<HotArticleVo> articleVos = BeanCopyUtils.copyBeanList(articles, HotArticleVo.class);
         return R.okResult(articleVos);
     }
+
+    @Override
+    public R getArticleList(Integer page_num, Integer page_size, Long category_id) {
+        // 查询条件
+        LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Objects.nonNull(category_id), Article::getCategoryId, category_id);
+        queryWrapper.eq(Article::getStatus, SystemConstans.ARTICLE_STATUS_NORMAL);
+        queryWrapper.orderByDesc(Article::getIsTop);
+        // 分页查询
+        Page<Article> page = new Page<>(page_num, page_size);
+        page(page, queryWrapper);
+        List<Article> articles = page.getRecords();
+        articles.parallelStream().map(article ->
+                article.setCategoryName(categoryService.getById(article.getCategoryId()).getName())
+        ).collect(Collectors.toList());
+        // 封查询结果
+        List<ArticleListVo> articleListVos = BeanCopyUtils.copyBeanList(articles, ArticleListVo.class);
+        PageVo pageVo = new PageVo(articleListVos, page.getTotal());
+        return R.okResult(pageVo);
+    }
+
 }

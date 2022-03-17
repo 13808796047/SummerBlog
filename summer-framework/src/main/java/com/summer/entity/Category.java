@@ -19,6 +19,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName("sg_category")
+
 public class Category {
     @TableId
     private Long id;
