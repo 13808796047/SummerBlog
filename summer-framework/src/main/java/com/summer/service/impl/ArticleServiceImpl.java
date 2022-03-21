@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.summer.constans.SystemConstans;
 import com.summer.entity.Article;
+import com.summer.entity.Category;
 import com.summer.entity.R;
+import com.summer.entity.vo.ArticleDetailVo;
 import com.summer.entity.vo.ArticleListVo;
 import com.summer.entity.vo.HotArticleVo;
 import com.summer.entity.vo.PageVo;
@@ -61,7 +63,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         queryWrapper.eq(Article::getStatus, SystemConstans.ARTICLE_STATUS_NORMAL);
         queryWrapper.orderByDesc(Article::getIsTop);
         // 分页查询
-        Page<Article> page = new Page<>(page_num, page_size);
+        Page<Article> page = new Page<>(page_num == null ? page_num : 1, 1);
         page(page, queryWrapper);
         List<Article> articles = page.getRecords();
         articles.parallelStream().map(article ->
@@ -71,6 +73,22 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         List<ArticleListVo> articleListVos = BeanCopyUtils.copyBeanList(articles, ArticleListVo.class);
         PageVo pageVo = new PageVo(articleListVos, page.getTotal());
         return R.okResult(pageVo);
+    }
+
+    @Override
+    public R getArticleDetail(Long id) {
+        // 根据id查询文章
+        Article article = getById(id);
+        // 转换成VO
+        ArticleDetailVo articleDetailVo = BeanCopyUtils.copyBean(article, ArticleDetailVo.class);
+        // 根据分类ID查询分类名
+        Long categoryId = articleDetailVo.getCategoryId();
+        Category category = categoryService.getById(categoryId);
+        if (category != null) {
+            articleDetailVo.setCategoryName(category.getName());
+        }
+
+        return R.okResult(articleDetailVo);
     }
 
 }
